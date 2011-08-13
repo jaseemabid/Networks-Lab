@@ -1,3 +1,7 @@
 *.o
 *.~
 
+docs/
+client
+server
+a.out
