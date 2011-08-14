@@ -2,9 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
+/*
+
+		In order to be notified of incoming connections on a  socket,  you  can
+		use  select(2)  or  poll(2).  A readable event will be delivered when a
+		new connection is attempted and you may then call  accept()  to  get  a
+		socket  for  that connection.  Alternatively, you can set the socket to
+		deliver SIGIO when activity occurs  on  a  socket;  see  socket(7)  for
+		details.
+
+
+*/
 
 void error(const char *msg)
 {
@@ -24,7 +36,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0) 
+	if (sockfd < 0)
 		error("ERROR opening socket");
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	portno = atoi(argv[1]);
@@ -32,12 +44,12 @@ int main(int argc, char *argv[])
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,
-			sizeof(serv_addr)) < 0) 
+			sizeof(serv_addr)) < 0)
 			error("ERROR on binding");
 	listen(sockfd,5);
 	clilen = sizeof(cli_addr);
 	newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-	if (newsockfd < 0) 
+	if (newsockfd < 0)
 		error("ERROR on accept");
 	bzero(buffer,256);
 	n = read(newsockfd,buffer,255);
@@ -47,5 +59,6 @@ int main(int argc, char *argv[])
 	if (n < 0) error("ERROR writing to socket");
 	close(newsockfd);
 	close(sockfd);
-	return 0; 
+	return 0;
 }
+
