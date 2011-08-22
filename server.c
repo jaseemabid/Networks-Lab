@@ -28,7 +28,10 @@ void error(const char *msg)
 
 int main(int argc, char *argv[])
 {
-	int sockfd, newsockfd, portno, n;
+
+	/* Declarations */
+
+	int sockfd[MAX_CONN], newsockfd[MAX_CONN], portno, n, connId = 0;
 	socklen_t clilen;
 	char buffer[256];
 	struct sockaddr_in serv_addr, cli_addr;
@@ -38,32 +41,39 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0)
-		error("ERROR opening socket");
-	bzero((char *) &serv_addr, sizeof(serv_addr));
-	portno = atoi(argv[1]);
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	serv_addr.sin_port = htons(portno);
-	if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-		error("ERROR on binding");
-	listen(sockfd,5);
-	clilen = sizeof(cli_addr);
-	newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
-	if (newsockfd < 0)
-		error("ERROR on accept");
-	/* Accepts multiple messages from 1 socket */
-	while(1) {
-		bzero(buffer,256);
-		n = read(newsockfd,buffer,255);
-		if (n < 0) error("ERROR reading from socket");
-		printf("Here is the message: %s\n",buffer);
-		n = write(newsockfd,"I got your message",18);
-		if (n < 0) error("ERROR writing to socket");
+	/* Have to do this per client */
+	void newConn( aConnId ) {
+		sockfd[connId] = socket(AF_INET, SOCK_STREAM, 0);
+		if (sockfd[connId] < 0)
+			error("ERROR opening socket");
+		bzero((char *) &serv_addr, sizeof(serv_addr));
+		portno = atoi(argv[1]);
+		serv_addr.sin_family = AF_INET;
+		serv_addr.sin_addr.s_addr = INADDR_ANY;
+		serv_addr.sin_port = htons(portno);
+		if (bind(sockfd[connId], (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+			error("ERROR on binding");
+		listen(sockfd[connId],5);
+		clilen = sizeof(cli_addr);
+		newsockfd[connId] = accept(sockfd[connId], (struct sockaddr *) &cli_addr, &clilen);
+		if (newsockfd[connId] < 0)
+			error("ERROR on accept");
+		/* Accepts multiple messages from 1 socket */
+		while(1) {
+			bzero(buffer,256);
+			n = read(newsockfd[connId],buffer,255);
+			if (n < 0) error("ERROR reading from socket");
+			printf("Here is the message: %s\n",buffer);
+			n = write(newsockfd[connId],"I got your message",18);
+			if (n < 0) error("ERROR writing to socket");
+		}
 	}
-	close(newsockfd);
-	close(sockfd);
+	
+	newConn(0);
+	
+	/* Dead code ! will never work */
+	close(newsockfd[0]); /* Should be closing all connections */
+	close(sockfd[0]);
 	return 0;
 }
 
