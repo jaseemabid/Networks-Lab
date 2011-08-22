@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#define MAX_CONN 10
+
 /*
 
 		In order to be notified of incoming connections on a  socket,  you  can
