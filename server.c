@@ -17,7 +17,7 @@ struct connection
 	int index;
 }
 
-int sockfd, newsockfd, portno, errorCode, connId = 0, i = 0;
+int sockfd, newsockfd, portno, errorCode, connId = 0, loopIndex = 0;
 socklen_t clilen;
 struct sockaddr_in serv_addr, cli_addr;
 struct connection conn[MAX_CONN];
@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
 
 	/* Have to do this per client */
 
-	while (i < MAX_CONN) {
+	while (loopIndex < MAX_CONN) {
 		clilen = sizeof(cli_addr);
-		printf("\nthread loop : %d\n ", i);
+		printf("\nthread loop : %d\n ", loopIndex);
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
 			exit(-1);
 		}
-	i = i+1;
+	loopIndex = loopIndex+1;
 	}
 
 	/* Dead code ! will never work */
