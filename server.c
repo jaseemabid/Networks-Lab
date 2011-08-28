@@ -27,7 +27,7 @@ void error(const char *msg)
 	exit(1);
 }
 
-void *dos(void *aSocket) {
+void *newClient(void *aSocket) {
 
 	int sockfd;
 	char buffer[256];
@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Server configuration */
+
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 		error("ERROR opening socket");
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
-		threadErrorCode	= pthread_create(&threads[t], NULL, dos, (void *)newsockfd );
+		threadErrorCode	= pthread_create(&threads[t], NULL, newClient , (void *)newsockfd );
 		if (threadErrorCode){
 			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
 			exit(-1);
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Dead code ! will never work */
-	close(newsockfd); /* Should be closing all connections */
+	close(newsockfd); /* Should be closing all connections if closing */
 	close(sockfd);
 	return 0;
 }
