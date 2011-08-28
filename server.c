@@ -9,17 +9,17 @@
 
 #define MAX_CONN 10
 
-/*
+	/* Declarations */
 
-		In order to be notified of incoming connections on a  socket,  you  can
-		use  select(2)  or  poll(2).  A readable event will be delivered when a
-		new connection is attempted and you may then call  accept()  to  get  a
-		socket  for  that connection.  Alternatively, you can set the socket to
-		deliver SIGIO when activity occurs  on  a  socket;  see  socket(7)  for
-		details.
+int sockfd, newsockfd, portno, n, connId = 0, i = 0;
+socklen_t clilen;
+struct sockaddr_in serv_addr, cli_addr;
 
+	/* The thread part of it !*/
 
-*/
+pthread_t threads[MAX_CONN];
+int threadErrorCode;
+long t;
 
 void error(const char *msg)
 {
@@ -27,59 +27,62 @@ void error(const char *msg)
 	exit(1);
 }
 
+void *dos(void *aSocket) {
+
+	int sockfd;
+	char buffer[256];
+	sockfd =(int)aSocket;
+
+	while(1) {
+		bzero(buffer,256);
+		n = read(sockfd,buffer,255);
+		if (n < 0) error("ERROR reading from socket");
+			printf("Here is the message: %s\n",buffer);
+		n = write(sockfd,"I got your message",18);
+		if (n < 0) error("ERROR writing to socket");
+	}
+}
+
 int main(int argc, char *argv[])
 {
-
-	/* Declarations */
-
-	int sockfd[MAX_CONN], newsockfd[MAX_CONN], portno, n, connId = 0;
-	socklen_t clilen;
-	char buffer[256];
-	struct sockaddr_in serv_addr, cli_addr;
-
-	/* The thread part of it !*/
-	pthread_t threads[MAX_CONN];
-	int threadErrorCode;
-	long t;
 
 	if (argc < 2) {
 		fprintf(stderr,"ERROR, no port provided\n");
 		exit(1);
 	}
 
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd < 0)
+		error("ERROR opening socket");
+	bzero((char *) &serv_addr, sizeof(serv_addr));
+	portno = atoi(argv[1]);
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	serv_addr.sin_port = htons(portno);
+	if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+		error("ERROR on binding");
+	listen(sockfd,5);
+
 	/* Have to do this per client */
-	void newConn( aConnId ) {
-		sockfd[connId] = socket(AF_INET, SOCK_STREAM, 0);
-		if (sockfd[connId] < 0)
-			error("ERROR opening socket");
-		bzero((char *) &serv_addr, sizeof(serv_addr));
-		portno = atoi(argv[1]);
-		serv_addr.sin_family = AF_INET;
-		serv_addr.sin_addr.s_addr = INADDR_ANY;
-		serv_addr.sin_port = htons(portno);
-		if (bind(sockfd[connId], (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-			error("ERROR on binding");
-		listen(sockfd[connId],5);
+
+	while (i < MAX_CONN) {
 		clilen = sizeof(cli_addr);
-		newsockfd[connId] = accept(sockfd[connId], (struct sockaddr *) &cli_addr, &clilen);
-		if (newsockfd[connId] < 0)
+		printf("\nthread loop\n");
+		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
+		if (newsockfd < 0)
 			error("ERROR on accept");
-		/* Accepts multiple messages from 1 socket */
-		while(1) {
-			bzero(buffer,256);
-			n = read(newsockfd[connId],buffer,255);
-			if (n < 0) error("ERROR reading from socket");
-			printf("Here is the message: %s\n",buffer);
-			n = write(newsockfd[connId],"I got your message",18);
-			if (n < 0) error("ERROR writing to socket");
+		threadErrorCode	= pthread_create(&threads[t], NULL, dos, (void *)newsockfd );
+		if (threadErrorCode){
+			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
+			exit(-1);
 		}
+	i = i+1;
 	}
-	
-	newConn(0);
-	
+
 	/* Dead code ! will never work */
-	close(newsockfd[0]); /* Should be closing all connections */
-	close(sockfd[0]);
+	close(newsockfd); /* Should be closing all connections */
+	close(sockfd);
 	return 0;
 }
 
+/* End of main */
