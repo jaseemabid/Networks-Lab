@@ -38,7 +38,6 @@ void *chatWrite(void) {
 	char buffer[256];
 	while(1) {
 		bzero(buffer,255);
-		printf("Say something : ");
 		fgets(buffer,255,stdin);
 		n = write(sockfd,buffer,strlen(buffer));
 		if (n < 0)
