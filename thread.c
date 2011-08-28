@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NUM_THREADS 10
+#define MAX_CONN 10
 void *function(void *threadid)
 {
 	long tid;
@@ -13,15 +13,14 @@ void *function(void *threadid)
 
 int main (int argc, char *argv[])
 {
-	pthread_t threads[NUM_THREADS];
-	int rc;
+	pthread_t threads[MAX_CONN];
+	int threadErrorCode;
 	long t;
-	for(t=0; t<NUM_THREADS; t++){
+	for(t=0; t<MAX_CONN; t++){
 		printf("In main: creating thread %ld\n", t);
-		rc	=	pthread_create(&threads[t], NULL, function, (void *)t);
-	//			pthread_create (thread,attr,start_routine,arg)
-		if (rc){
-			printf("ERROR; return code from pthread_create() is %d\n", rc);
+		threadErrorCode	=	pthread_create(&threads[t], NULL, function, (void *)t);
+		if (threadErrorCode){
+			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
 			exit(-1);
 		}
 	}
