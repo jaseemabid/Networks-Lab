@@ -11,16 +11,15 @@
 
 	/* Declarations */
 
-struct connection
-{
-	int sockfd;
+struct connection {
+	int sock;
 	int index;
-}
+};
 
-int sockfd, newsockfd, portno, errorCode, connId = 0, loopIndex = 0;
+int sockfd, newsockfd, portno, errorCode, loopIndex = 0, peer;
 socklen_t clilen;
 struct sockaddr_in serv_addr, cli_addr;
-struct connection conn[MAX_CONN];
+struct connection user[MAX_CONN];
 
 	/* The thread part of it !*/
 
@@ -44,8 +43,11 @@ void *newClient(void *aSocket) {
 		bzero(buffer,256);
 		errorCode = read(sockfd,buffer,255);
 		if (errorCode < 0) error("ERROR reading from socket");
-			printf("Here is the message: %s\n",buffer);
-		errorCode = write(sockfd,"I got your message",18);
+		char *ch = &buffer[0], *peerId = "peerId :";
+		peer = atoi(ch);
+		printf(">> Peer %d : %s",peer,buffer);
+		errorCode = write(user[peer].sock,buffer,255);
+		errorCode = write(sockfd,peerId,255);
 		if (errorCode < 0) error("ERROR writing to socket");
 	}
 }
@@ -76,15 +78,16 @@ int main(int argc, char *argv[])
 
 	while (loopIndex < MAX_CONN) {
 		clilen = sizeof(cli_addr);
-		printf("\nthread loop : %d\n ", loopIndex);
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
+		
+		user[loopIndex].sock = newsockfd;
+		user[loopIndex].index = loopIndex;
+		fprintf(stdout,"\n%d Added\n", loopIndex);
 		threadErrorCode	= pthread_create(&threads[t], NULL, newClient , (void *)newsockfd );
-		if (threadErrorCode){
+		if (threadErrorCode)
 			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
-			exit(-1);
-		}
 	loopIndex = loopIndex+1;
 	}
 
