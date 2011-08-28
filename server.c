@@ -11,9 +11,16 @@
 
 	/* Declarations */
 
-int sockfd, newsockfd, portno, n, connId = 0, i = 0;
+struct connection
+{
+	int sockfd;
+	int index;
+}
+
+int sockfd, newsockfd, portno, errorCode, connId = 0, i = 0;
 socklen_t clilen;
 struct sockaddr_in serv_addr, cli_addr;
+struct connection conn[MAX_CONN];
 
 	/* The thread part of it !*/
 
@@ -35,11 +42,11 @@ void *newClient(void *aSocket) {
 
 	while(1) {
 		bzero(buffer,256);
-		n = read(sockfd,buffer,255);
-		if (n < 0) error("ERROR reading from socket");
+		errorCode = read(sockfd,buffer,255);
+		if (errorCode < 0) error("ERROR reading from socket");
 			printf("Here is the message: %s\n",buffer);
-		n = write(sockfd,"I got your message",18);
-		if (n < 0) error("ERROR writing to socket");
+		errorCode = write(sockfd,"I got your message",18);
+		if (errorCode < 0) error("ERROR writing to socket");
 	}
 }
 
@@ -69,7 +76,7 @@ int main(int argc, char *argv[])
 
 	while (i < MAX_CONN) {
 		clilen = sizeof(cli_addr);
-		printf("\nthread loop\n");
+		printf("\nthread loop : %d\n ", i);
 		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
