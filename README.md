@@ -30,31 +30,31 @@ be able to work with them manually.
 
 Following are the steps to manually get the submodules:
 
-1. `git clone https://github.com/jquery/jquery.git`
+1. `git clone https://jaseemabid@github.com/jaseemabid/Networks-Lab.git`
 2. `git submodule init`
 3. `git submodule update`
 
 Or:
 
-1. `git clone https://github.com/jquery/jquery.git`
+1. `git clone https://jaseemabid@github.com/jaseemabid/Networks-Lab.git`
 2. `git submodule update --init`
 
 Or:
 
-1. `git clone --recursive https://github.com/jquery/jquery.git`
+1. `git clone --recursive https://jaseemabid@github.com/jaseemabid/Networks-Lab.git`
 
 If you want to work inside a submodule, it is possible, but first you need to checkout a branch:
 
-1. `cd src/sizzle`
+1. `cd src/docs`
 2. `git checkout master`
 
 After you've committed your changes to the submodule, you'll update the jquery project to point to the new commit,
 but remember to push the submodule changes before pushing the new jquery commit:
 
-1. `cd src/sizzle`
+1. `cd src/docs`
 2. `git push origin master`
 3. `cd ..`
-4. `git add src/sizzle`
+4. `git add src/docs`
 5. `git commit`
 
 The makefile has some targets to simplify submodule handling:
