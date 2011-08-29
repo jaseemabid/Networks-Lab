@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <string.h>
+
 
 #define MAX_CONN 10
 
@@ -16,7 +18,7 @@ struct connection {
 	int index;
 };
 
-int sockfd, newsockfd, portno, errorCode, loopIndex = 0, peer;
+int sockfd, newsockfd, portno, errorCode, loopIndex = 0;
 socklen_t clilen;
 struct sockaddr_in serv_addr, cli_addr;
 struct connection user[MAX_CONN];
@@ -33,21 +35,30 @@ void error(const char *msg)
 	exit(1);
 }
 
-void *newClient(void *aSocket) {
+void *newClient(void *aUser ) {
 
-	int sockfd;
+	struct connection *temp;
+	temp = (struct connection *)aUser;
+	int sockfd, self, peer, flag = 1;
 	char buffer[256];
-	sockfd =(int)aSocket;
+	sockfd = temp->sock ;
+	self = temp->index;
 
 	while(1) {
 		bzero(buffer,256);
-		errorCode = read(sockfd,buffer,255);
+		if (flag == 1) { /* Read the peer only once, then do a continues chat */
+			errorCode = write(user[self].sock,"Peer id : ",10);
+			errorCode = read(user[self].sock, buffer, 1);
+			char *ch = &buffer[0];
+			peer = atoi(ch);
+			errorCode = write(user[self].sock,"Connected to peer",10);
+			flag = 0;
+		}
+		
+		errorCode = read(user[self].sock,buffer,255);
 		if (errorCode < 0) error("ERROR reading from socket");
-		char *ch = &buffer[0], *peerId = "peerId :";
-		peer = atoi(ch);
-		printf(">> Peer %d : %s",peer,buffer);
+		printf(">> Client %d to peer %d : %s",self,peer,buffer);
 		errorCode = write(user[peer].sock,buffer,255);
-		errorCode = write(sockfd,peerId,255);
 		if (errorCode < 0) error("ERROR writing to socket");
 	}
 }
@@ -85,7 +96,7 @@ int main(int argc, char *argv[])
 		user[loopIndex].sock = newsockfd;
 		user[loopIndex].index = loopIndex;
 		fprintf(stdout,"\n%d Added\n", loopIndex);
-		threadErrorCode	= pthread_create(&threads[t], NULL, newClient , (void *)newsockfd );
+		threadErrorCode	= pthread_create(&threads[t], NULL, newClient , (void *) &user[loopIndex] );
 		if (threadErrorCode)
 			printf("ERROR; return code from pthread_create() is %d\n", threadErrorCode);
 	loopIndex = loopIndex+1;
