@@ -1,4 +1,6 @@
-# Networks lab programming codes by Jaseem Abid
+# A simple chat server with unix sockets.
+
+Author : Jaseem Abid <jaseemabid@gmail.com>
 
 ### Testing instructions
 
