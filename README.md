@@ -1,6 +1,7 @@
 # A simple chat server with unix sockets.
 
 Author : Jaseem Abid <jaseemabid@gmail.com>
+License : GPL V3
 
 ### Testing instructions
 
@@ -11,7 +12,7 @@ Author : Jaseem Abid <jaseemabid@gmail.com>
 5. Run any number of clients in different terminals
 6. Send messages to user<n> in the format `<userid> <Message>`. Eg: `1 hello world`
 
-## Report bugs at [github](https://github.com/jaseemabid/Networks-Lab/issues)
+Code tested on an ubuntu 10.04 LTS machine with gcc (Ubuntu 4.4.3-4ubuntu5) 4.4.3
 
 ### References
 
@@ -19,8 +20,8 @@ Author : Jaseem Abid <jaseemabid@gmail.com>
 * Threading tutorial : https://computing.llnl.gov/tutorials/pthreads/
 * A good place to start learning git would be https://gist.github.com/1210107
 
-Questions?
-----------
+### Questions?
 
 If you have any questions, please feel free to ask me at <jaseemabid@gmail.com>
 
+### Report bugs at [github](/jaseemabid/Networks-Lab/issues)
