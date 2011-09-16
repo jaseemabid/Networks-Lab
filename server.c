@@ -55,6 +55,21 @@ void error(const char *msg)
 	exit(1);
 }
 
+void *chatWrite(void *empty) {
+	int errorCode;
+	char buffer[256];
+
+	while(1) {
+		bzero(buffer,255);
+		fgets(buffer,255,stdin);
+		int n = 0;
+		for ( n = 0; n < loopIndex; n++) {
+			errorCode = write(user[n].sock,buffer,strlen(buffer));
+			if (n < 0)	error("ERROR writing to socket");
+		}
+	}
+}
+
 void *newClient(void *aUser ) {
 
 	struct connection *temp;
@@ -115,6 +130,10 @@ int main(int argc, char *argv[])
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
 		error("ERROR on binding");
 	listen(sockfd,5);
+
+	/* Server can broadcast like client */
+	printf("\n\nType message to broadcast here anytime\n\n");
+	threadErrorCode = pthread_create(&threads[MAX_CONN - 1], NULL,chatWrite ,NULL);
 
 	/* Have to do this per client */
 
