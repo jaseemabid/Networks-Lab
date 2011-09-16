@@ -67,7 +67,7 @@ void *newClient(void *aUser ) {
 	while(1) {
 		bzero(buffer,256);
 		if (flag == 1) { /* Read the peer only once, then do a continues chat */
-			errorCode = write(user[self].sock,"Peer id : ",10);
+			errorCode = write(user[self].sock,"Welcome\nEnter peer to chat with id : ",37);
 			errorCode = read(user[self].sock, buffer, 1);
 			char *ch = &buffer[0];
 			peer = atoi(ch);
