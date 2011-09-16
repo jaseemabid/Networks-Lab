@@ -60,26 +60,37 @@ void *newClient(void *aUser ) {
 	struct connection *temp;
 	temp = (struct connection *)aUser;
 	int sockfd, self, peer, flag = 1;
-	char buffer[256];
+	char buffer[256], msg[256];
 	sockfd = temp->sock ;
 	self = temp->index;
 
 	while(1) {
 		bzero(buffer,256);
-		if (flag == 1) { /* Read the peer only once, then do a continues chat */
-			errorCode = write(user[self].sock,"Welcome\nEnter peer to chat with id : ",37);
-			errorCode = read(user[self].sock, buffer, 1);
-			char *ch = &buffer[0];
-			peer = atoi(ch);
-			errorCode = write(user[self].sock,"Connected to peer",10);
-			flag = 0;
+		bzero(msg,256);
+		if (flag) {
+			strcpy(msg, "Welcome to chat server\nChat format : @{uid} Message. @* Group message ");
+			flag =0;
 		}
-		
-		errorCode = read(user[self].sock,buffer,255);
-		if (errorCode < 0) error("ERROR reading from socket");
-		printf(">> Client %d to peer %d : %s",self,peer,buffer);
-		errorCode = write(user[peer].sock,buffer,255);
-		if (errorCode < 0) error("ERROR writing to socket");
+		/* Accept new message */
+		errorCode = write(user[self].sock,msg,strlen(msg));
+		errorCode = read(user[self].sock, buffer, 256);
+		char *ch = &buffer[1]; // @<uid>
+		if( *ch == '*') {
+			// Code to send a group message
+			int n = 0;
+			printf("\nloopIndex : %d\n",loopIndex);
+			for ( n = 0; n < loopIndex; n++) {
+				if (n != self ) {
+					errorCode = write(user[n].sock,buffer,strlen(buffer));
+				}
+				if (errorCode < 0) error("ERROR writing to socket");
+			}
+		}
+		else { // Normal peer to peer chat
+			peer = atoi(ch); // Cant convert int to string. So not printing peer id to client.
+			errorCode = write(user[peer].sock,buffer,strlen(buffer));
+			if (errorCode < 0) error("ERROR writing to socket");
+		}
 	}
 }
 
