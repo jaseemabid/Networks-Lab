@@ -26,7 +26,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
-#include <string.h>
 
 
 #define MAX_CONN 10
