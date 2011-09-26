@@ -29,7 +29,7 @@
 
 	/* global declarations */
 
-	int sockfd, portno, n, threadRead, threadWrite;
+	int sockfd, portno, n, threadWrite;
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 	pthread_t threads[2];
@@ -90,12 +90,5 @@ int main(int argc, char *argv[])
 		error("ERROR connecting");
 	threadWrite = pthread_create(&threads[1], NULL,chatWrite ,(void *)sockfd);
 	chatRead();
-
-	if( threadRead)
-		error("ERROR on threading");
-
-	close(sockfd);
-	fprintf(stdout,"Client exiting");
-	return 0;
 }
 
