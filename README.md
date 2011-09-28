@@ -14,6 +14,13 @@ License : GPL V3
 
 Code tested on an ubuntu 10.04 LTS machine with gcc (Ubuntu 4.4.3-4ubuntu5) 4.4.3
 
+### Usage
+
+A message can be sent from peer to peer in the format '@<peer id> Message'
+It is assumed now that the entered peed id is valid integer. A '*' will enable users to broadcast message to all logged in users at the same given time.
+Sample message `@3 Hello world :)`
+Clients use a multi threaded approach to recieve and send messages the same time. A thread runs listening to the socket and one to stdin. This enables concurrent chat between multiple users.
+
 ### References
 
 * Original source of the demo codes : http://www.linuxhowtos.org/C_C++/socket.htm
