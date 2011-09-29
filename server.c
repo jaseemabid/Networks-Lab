@@ -82,28 +82,25 @@ void *newClient(void *aUser ) {
 		bzero(buffer,256);
 		bzero(msg,256);
 		if (flag) {
-			strcpy(msg, "Welcome to chat server\nChat format : @{uid} Message. @* Group message ");
+			strcpy(msg, "Welcome to chat server\nChat format : @{uid} Message. (@* | '') Group message ");
 			flag =0;
 		}
 		/* Accept new message */
 		errorCode = write(user[self].sock,msg,strlen(msg));
 		errorCode = read(user[self].sock, buffer, 256);
-		char *ch = &buffer[1]; // @<uid>
-		if( *ch == '*') {
+		if (buffer[0] == '@' && buffer[1] <= '9' && buffer[1] >= '0') { // Normal peer to peer chat
+			peer = atoi(&buffer[1]); // Cant convert int to string. So not printing peer id to client.
+			errorCode = write(user[peer].sock,buffer,strlen(buffer));
+			if (errorCode < 0) error("ERROR writing to socket");
+		} else {
 			// Code to send a group message
-			int n = 0;
-			printf("\nloopIndex : %d\n",loopIndex);
-			for ( n = 0; n < loopIndex; n++) {
+			int n;
+			for (n = 0; n < loopIndex; n++) {
 				if (n != self ) {
 					errorCode = write(user[n].sock,buffer,strlen(buffer));
 				}
 				if (errorCode < 0) error("ERROR writing to socket");
 			}
-		}
-		else { // Normal peer to peer chat
-			peer = atoi(ch); // Cant convert int to string. So not printing peer id to client.
-			errorCode = write(user[peer].sock,buffer,strlen(buffer));
-			if (errorCode < 0) error("ERROR writing to socket");
 		}
 	}
 }
