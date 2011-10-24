@@ -42,31 +42,9 @@ socklen_t clilen;
 struct sockaddr_in serv_addr, cli_addr;
 struct connection user[MAX_CONN];
 
-	/* The thread part of it !*/
-
-pthread_t threads[MAX_CONN];
-int threadErrorCode;
-long t;
-
-void error(const char *msg)
-{
+void error(const char *msg) {
 	perror(msg);
 	exit(1);
-}
-
-void *chatWrite(void *empty) {
-	int errorCode;
-	char buffer[256];
-
-	while(1) {
-		bzero(buffer,255);
-		fgets(buffer,255,stdin);
-		int n = 0;
-		for ( n = 0; n < loopIndex; n++) {
-			errorCode = write(user[n].sock,buffer,strlen(buffer));
-			if (n < 0)	error("ERROR writing to socket");
-		}
-	}
 }
 
 void *newClient(void *aUser ) {
@@ -115,7 +93,7 @@ int main(int argc, char *argv[])
 
 	/* Server configuration */
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	sockfd = socket(AF_INET, SOCK_DGRAM , 0);
 	if (sockfd < 0)
 		error("ERROR opening socket");
 	bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -126,10 +104,6 @@ int main(int argc, char *argv[])
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
 		error("ERROR on binding");
 	listen(sockfd,5);
-
-	/* Server can broadcast like client */
-	printf("\n\nType message to broadcast here anytime\n\n");
-	threadErrorCode = pthread_create(&threads[MAX_CONN - 1], NULL,chatWrite ,NULL);
 
 	/* Have to do this per client */
 
